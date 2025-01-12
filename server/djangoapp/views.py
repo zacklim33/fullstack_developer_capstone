@@ -14,7 +14,9 @@ import logging
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
-# from .populate import initiate
+
+from .models import CarMake, CarModel
+from .populate import initiate
 
 
 # Get an instance of a logger
@@ -42,7 +44,6 @@ def login_user(request):
 
 # Create a `logout_user` view to handle sign out request
 def logout_user(request):
-    logout(request)
     data= {'userName':''}
     return JsonResponse(data)
 
@@ -100,6 +101,18 @@ def registration_user(request):
         data = {'email': email, 'error': "Email Taken"}
         return JsonResponse(data)
 
+
+#Get cars 
+def get_cars(request):
+    count = CarMake.objects.filter().count()
+    print(count)
+    if(count == 0):
+        initiate()
+    car_models = CarModel.objects.select_related('car_make')
+    cars = []
+    for car_model in car_models:
+        cars.append({"CarModel": car_model.name, "CarMake": car_model.car_make.name})
+    return JsonResponse({"CarModels":cars})
 
 
 # # Update the `get_dealerships` view to render the index page with
